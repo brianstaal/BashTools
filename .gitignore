@@ -2,5 +2,8 @@
 __pycache__/
 *.py[cod]
 
+# Local editor settings
+.vscode/
+
 # Generated MegaRAID reports and raw command output
 MegaRaid/output/
