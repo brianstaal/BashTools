@@ -1,0 +1,6 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Generated MegaRAID reports and raw command output
+MegaRaid/output/
