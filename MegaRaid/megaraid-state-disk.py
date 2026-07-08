@@ -9,6 +9,9 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 
+BRAND_LINE = "by WiseSoft ©2026"
+
+
 @dataclass
 class Disk:
     disk: str
@@ -589,6 +592,8 @@ def main() -> None:
         classify_disk(disk)
     classify_controller(ctrl_summary)
 
+    print(BRAND_LINE)
+    print()
     print_controller_summary(ctrl_summary)
     print_summary(disks, ctrl_summary)
     print_table(disks)

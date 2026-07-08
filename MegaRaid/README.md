@@ -2,6 +2,12 @@
 
 Small Debian/Ubuntu-friendly tool for showing physical MegaRAID disk status in a clean table.
 
+Reports include:
+
+```text
+by WiseSoft ©2026
+```
+
 ## Files to copy
 
 Copy these two files to the target machine:
@@ -43,6 +49,24 @@ sudo apt install smartmontools
 ```
 
 Without `smartctl`, the script still prints the storcli-based health table, but `Life left` will show `smartctl missing`.
+
+## Tools Used
+
+The report is created with these tools:
+
+```text
+python3   Runs the parser, formats the report, and creates the zip archive.
+storcli   Reads MegaRAID controller, virtual drive, enclosure, and physical disk state.
+smartctl  Reads per-disk SMART health, SSD lifetime, power-on hours, write counters, and error logs.
+sh        Runs the wrapper script on Debian/Ubuntu.
+awk       Adds color highlighting to interactive console output.
+find      Removes loose .txt and .log files after the zip archive has been created.
+readlink  Resolves the wrapper path when launched through a symlink.
+date      Creates the timestamp used for output filenames.
+cp        Copies storcli.log to a timestamped debug log before zipping.
+```
+
+`python3`, `sh`, `awk`, `find`, `readlink`, `date`, and `cp` are normally available on a standard Debian/Ubuntu system. `storcli` must be installed separately. `smartctl` is provided by `smartmontools`.
 
 ## Install
 
@@ -96,31 +120,49 @@ sudo megaraid-state-disk --device /dev/sdb
 
 When called through `megaraid-state-disk.sh`, the output is printed to the terminal and also saved to disk.
 
-By default, saved reports are written next to the installed script:
+Interactive terminal output is colorized:
 
 ```text
-/opt/megaraid-tools/output/megaraid-state-disk-YYYYMMDD-HHMMSS.txt
+green   OK
+yellow  WARN
+red     CRITICAL
+cyan    section headings
 ```
 
-If `storcli` creates its own `storcli.log`, that log is also written in the same output directory:
+Saved report files are plain text without color codes. Disable terminal colors with:
 
-```text
-/opt/megaraid-tools/output/storcli.log
-/opt/megaraid-tools/output/storcli-debug-YYYYMMDD-HHMMSS.log
+```bash
+NO_COLOR=1 sudo megaraid-state-disk
+MEGARAID_COLOR=never sudo megaraid-state-disk
 ```
 
-The script also saves the raw `storcli` command output used for parsing:
+By default, each run creates one zip archive next to the installed script:
 
 ```text
-/opt/megaraid-tools/output/storcli-c0-show-YYYYMMDD-HHMMSS.txt
-/opt/megaraid-tools/output/storcli-c0-eall-sall-show-YYYYMMDD-HHMMSS.txt
-/opt/megaraid-tools/output/storcli-c0-eall-sall-show-all-YYYYMMDD-HHMMSS.txt
+/opt/megaraid-tools/output/YYYYMMDD-HHMMSS.zip
 ```
 
-Raw `smartctl` output is saved once per disk, using the same timestamp as the table report:
+The zip file contains the report and the raw evidence files from that same run. After the zip has been created, loose `.txt` and `.log` files are removed from the output folder.
+
+If `storcli` creates its own `storcli.log`, that log is included in the zip:
 
 ```text
-/opt/megaraid-tools/output/smartctl-megaraid-DID-YYYYMMDD-HHMMSS.txt
+storcli.log
+storcli-debug-YYYYMMDD-HHMMSS.log
+```
+
+The script also saves the raw `storcli` command output used for parsing inside the zip:
+
+```text
+storcli-c0-show-YYYYMMDD-HHMMSS.txt
+storcli-c0-eall-sall-show-YYYYMMDD-HHMMSS.txt
+storcli-c0-eall-sall-show-all-YYYYMMDD-HHMMSS.txt
+```
+
+Raw `smartctl` output is saved once per disk inside the zip, using the same timestamp as the table report:
+
+```text
+smartctl-megaraid-DID-YYYYMMDD-HHMMSS.txt
 ```
 
 These raw files are useful for auditing exactly which SMART attribute produced the `Life left` value.
